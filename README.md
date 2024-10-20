@@ -5,6 +5,27 @@ Sample Code for Automating Deployments of Google Cloud Run Functions with Terraf
 
 This repository uses Terraform to manage the CI/CD pipeline for Google Cloud Functions. The code within the `src` folder is automatically built and deployed to Google Cloud Functions whenever there is a push to the repository. This setup ensures that the latest code is always running in your cloud environment without manual intervention.
 
+The code in this repository is structured as follows:
+
+The `environments/` folder contains subfolders that represent environments, such as dev and prod, which provide logical separation between workloads at different stages of maturity, development and production, respectively. Although it's a good practice to have these environments as similar as possible, each subfolder has its own Terraform configuration to ensure they can have unique settings as necessary.
+
+The `modules/` folder contains inline Terraform modules. These modules represent logical groupings of related resources and are used to share code across different environments.
+
+The `cloudbuild.yaml` file is a build configuration file that contains instructions for Cloud Build, such as how to perform tasks based on a set of steps. This file specifies a conditional execution depending on the branch Cloud Build is fetching the code from, for example:
+
+For `dev` and `prod` branches, the following steps are executed:
+
+`terraform init`
+`terraform plan`
+`terraform apply`
+For any other branch, the following steps are executed:
+
+`terraform init` for all `environments` subfolders
+`terraform plan` for all `environments` subfolders
+To ensure that the changes being proposed are appropriate for every environment, `terraform init` and `terraform plan` are run for all `environments` subfolders. Before merging the pull request, you can review the plans to make sure that access isn't being granted to an unauthorized entity, for example.
+
+
+
 ## Workflow
 
 1. **Code Management:**  
